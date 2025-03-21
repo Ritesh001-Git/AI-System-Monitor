@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-time System Monitor with AI Prediction</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #333;
+            color: #fff;
+            min-height: 100vh;
+        }
+        h1 {
+            text-align: center;
+            font-size: 32px;
+            margin-bottom: 20px;
+        }
+        .button-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #1e90ff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button:hover {
+            background-color: #3742fa;
+        }
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+        .card {
+            background-color: #1e1e1e;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+            color: #fff;
+        }
+        footer {
+            margin-top: 20px;
+            text-align: center;
+            color: #b0b0b0;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+</head>
+<body>
+    <h1>Real-time System Monitor with AI Prediction</h1>
+
+    <div class="button-container">
+        <button onclick="downloadLogs()">Download CSV Logs</button>
+        <button onclick="toggleDarkMode()">Toggle Dark Mode</button>
+    </div>
+
+    <div class="grid-container">
+        <div class="card">
+            <h2>CPU Usage (<span id="cpuValue">0.00</span>%)</h2>
+            <canvas id="cpuChart"></canvas>
+        </div>
+        <div class="card">
+            <h2>Memory Usage (<span id="memoryValue">0.00</span>%)</h2>
+            <canvas id="memoryChart"></canvas>
+        </div>
+        <div class="card">
+            <h2>Predicted CPU Usage (<span id="predictedCpuValue">0.00</span>%)</h2>
+            <canvas id="predictedCpuChart"></canvas>
+        </div>
+        <div class="card">
+            <h2>Predicted Memory Usage (<span id="predictedMemoryValue">0.00</span>%)</h2>
+            <canvas id="predictedMemoryChart"></canvas>
+        </div>
+    </div>
+
+    <footer>
+        <h3>AI Predictions Summary</h3>
+        <p>
+            Predicted Disk Usage: <strong id="diskPred">0%</strong> |
+            Predicted CPU Load Peak: <strong id="cpuPredPeak">0%</strong> |
+            Memory Stability: <strong id="memStability">Low</strong>
+        </p>
+        <h4>What it Means</h4>
+        <p>
+            The graphs show real-time and predicted CPU, memory, and disk usage. 
+            Predictions help anticipate system stress, optimizing performance proactively.
+        </p>
+    </footer>
+
+    <script>
+        let darkMode = true;
+        const socket = io();
+        const dataLength = 30;
+        const labels = Array.from({ length: dataLength }, (_, i) => `${i}s`);
+
+        // Initialize charts
+        const createChart = (ctx, label, color) => {
+            return new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: label,
+                        data: [],
+                        borderColor: color,
+                        backgroundColor: 'transparent',
+                        borderWidth: 2,
+                        pointRadius: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        x: { grid: { color: '#666' }, ticks: { color: '#fff' } },
+                        y: { grid: { color: '#666' }, ticks: { color: '#fff' }, suggestedMin: 0, suggestedMax: 100 }
+                    },
+                    plugins: {
+                        legend: { labels: { color: '#fff' } },
+                        tooltip: { enabled: true }
+                    },
+                    animation: { duration: 1000 }
+                }
+            });
+        };
+
+        // Chart instances
+        const cpuChart = createChart(document.getElementById('cpuChart').getContext('2d'), 'CPU Usage (%)', '#ff4757');
+        const memoryChart = createChart(document.getElementById('memoryChart').getContext('2d'), 'Memory Usage (%)', '#1e90ff');
+        const predictedCpuChart = createChart(document.getElementById('predictedCpuChart').getContext('2d'), 'Predicted CPU (%)', '#ffa502');
+        const predictedMemoryChart = createChart(document.getElementById('predictedMemoryChart').getContext('2d'), 'Predicted Memory (%)', '#2ed573');
+
+        // Socket listener for real-time updates
+        socket.on('update_data', (data) => {
+            // Update chart data
+            updateChartData(cpuChart, data.cpu);
+            updateChartData(memoryChart, data.memory);
+            updateChartData(predictedCpuChart, data.cpu_pred);
+            updateChartData(predictedMemoryChart, data.memory_pred);
+
+            // Update titles with dynamic values
+            document.getElementById('cpuValue').textContent = data.cpu.toFixed(2);
+            document.getElementById('memoryValue').textContent = data.memory.toFixed(2);
+            document.getElementById('predictedCpuValue').textContent = data.cpu_pred.toFixed(2);
+            document.getElementById('predictedMemoryValue').textContent = data.memory_pred.toFixed(2);
+
+            // Update footer predictions
+            document.getElementById('diskPred').textContent = `${typeof data.disk_pred === 'number' ? data.disk_pred.toFixed(2) : 'Model Not Found'}%`;
+            document.getElementById('cpuPredPeak').textContent = `${data.cpu_pred.toFixed(2)}%`;
+            document.getElementById('memStability').textContent = 
+                data.memory_pred > 80 ? 'High' : data.memory_pred > 50 ? 'Moderate' : 'Low';
+        });
+
+        // Helper function to update chart data
+        function updateChartData(chart, value) {
+            if (chart.data.datasets[0].data.length >= dataLength) {
+                chart.data.datasets[0].data.shift();
+            }
+            chart.data.datasets[0].data.push(value);
+            chart.update();
+        }
+
+        // Toggle dark mode
+        function toggleDarkMode() {
+            darkMode = !darkMode;
+            document.body.style.backgroundColor = darkMode ? '#333' : '#f4f4f9';
+            document.body.style.color = darkMode ? '#fff' : '#333';
+        }
+
+        // CSV download placeholder
+        function downloadLogs() {
+            alert("Downloading logs...");
+        }
+    </script>
+</body>
+</html>
