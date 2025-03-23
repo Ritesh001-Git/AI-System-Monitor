@@ -12,7 +12,9 @@ The AI-Powered System Monitor is a real-time system monitoring tool that:
 
 ✅ Provides a user-friendly web interface for real-time visualization
 
+![System Architecture](images/system_architecture.png)
 
+![Flow Diagram](images/flow_diagram.png)
 
 
 ## 📌 Features
