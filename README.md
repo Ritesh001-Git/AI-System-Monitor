@@ -107,7 +107,7 @@ Open your browser and visit:
 ### **Live Monitoring Dashboard**
 ![Dashboard View 1](images/dashboard_1.png)
 
-### **Detailed System Stats**
+### **AI Predicition Stats**
 ![Dashboard View 2](images/dashboard_2.png)
 
 
