@@ -1,3 +1,5 @@
+# Flask app to monitor system performance in real-time
+
 from flask import Flask, render_template, Response
 from flask_socketio import SocketIO
 import psutil
