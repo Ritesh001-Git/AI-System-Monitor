@@ -134,6 +134,7 @@
             });
         };
 
+        // Added Chart.js for interactive data visualization
         // Chart instances
         const cpuChart = createChart(document.getElementById('cpuChart').getContext('2d'), 'CPU Usage (%)', '#ff4757');
         const memoryChart = createChart(document.getElementById('memoryChart').getContext('2d'), 'Memory Usage (%)', '#1e90ff');
@@ -141,6 +142,7 @@
         const predictedMemoryChart = createChart(document.getElementById('predictedMemoryChart').getContext('2d'), 'Predicted Memory (%)', '#2ed573');
 
         // Socket listener for real-time updates
+        
         socket.on('update_data', (data) => {
             // Update chart data
             updateChartData(cpuChart, data.cpu);
