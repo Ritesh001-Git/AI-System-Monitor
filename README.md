@@ -71,10 +71,6 @@ system-monitor/
 
 │── README.md                 # Project documentation
 
-## Installation Guide
-Follow these steps to set up the system monitoring tool:
-1. Install dependencies using `pip install -r requirements.txt`
-2. Start the application using `python3 app.py`
 
 
 ## 📌 Installation & Setup
@@ -106,6 +102,13 @@ Open your browser and visit:
 🔗 http://127.0.0.1:5000
 
 
+## Dashboard Preview
+
+### **Live Monitoring Dashboard**
+![Dashboard View 1](images/dashboard_1.png)
+
+### **Detailed System Stats**
+![Dashboard View 2](images/dashboard_2.png)
 
 
 
