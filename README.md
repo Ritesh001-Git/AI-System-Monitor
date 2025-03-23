@@ -65,7 +65,10 @@ system-monitor/
 
 │── README.md                 # Project documentation
 
-
+## Installation Guide
+Follow these steps to set up the system monitoring tool:
+1. Install dependencies using `pip install -r requirements.txt`
+2. Start the application using `python3 app.py`
 
 
 ## 📌 Installation & Setup
