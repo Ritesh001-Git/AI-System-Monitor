@@ -159,4 +159,6 @@ Open your browser and visit:
 ## 📌 License
 This project is open-source and available under the MIT License.
 
+[MIT LICENSE](LICENCE)
+
 # 🎯 Happy Coding! 🚀
